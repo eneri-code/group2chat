@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "309606259473",
+    "project_id": "group2-charting",
+    "storage_bucket": "group2-charting.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:309606259473:android:01e973e68caa93049fcab0",
+        "android_client_info": {
+          "package_name": "com.company.group2_chat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7SwBWMLJCt24hvewDOmiKAUrbApcD4OI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:309606259473:android:211ca1dfb92d03c29fcab0",
+        "android_client_info": {
+          "package_name": "com.example.group2_chat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7SwBWMLJCt24hvewDOmiKAUrbApcD4OI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
