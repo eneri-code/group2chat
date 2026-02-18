@@ -12,7 +12,7 @@ class LoginScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   // Accessing the AuthController
   final AuthController _authController = Get.find<AuthController>();
 
@@ -30,11 +30,15 @@ class LoginScreen extends StatelessWidget {
               children: [
                 const Text(
                   'Welcome Back',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 40),
-                
+
+                // Email Field
                 CustomTextField(
                   controller: _emailController,
                   hintText: 'Email',
@@ -42,15 +46,39 @@ class LoginScreen extends StatelessWidget {
                   prefixIcon: Icons.email_outlined,
                 ),
                 const SizedBox(height: 16),
-                
+
+                // Password Field (Eye icon works from CustomTextField)
                 CustomTextField(
                   controller: _passwordController,
                   hintText: 'Password',
                   isPassword: true,
                   prefixIcon: Icons.lock_outline,
                 ),
+
+                const SizedBox(height: 8),
+
+                // Forgot Password
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () {
+                      _authController.forgotPassword(
+                        _emailController.text.trim(),
+                      );
+                    },
+                    child: const Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 24),
-                
+
+                // Login Button
                 Obx(() => CustomButton(
                   text: 'Login',
                   isLoading: _authController.isLoading.value,
@@ -63,8 +91,10 @@ class LoginScreen extends StatelessWidget {
                     }
                   },
                 )),
-                
+
                 const SizedBox(height: 16),
+
+                // Sign Up Navigation
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

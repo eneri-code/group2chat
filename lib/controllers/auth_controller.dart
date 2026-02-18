@@ -15,22 +15,34 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Bind the firebase user to the observable to track auth state changes
-    firebaseUser.bindStream(FirebaseAuth.instance.authStateChanges());
+    // Listen to authentication state changes
+    firebaseUser.bindStream(_authService.authStateChanges);
   }
 
+  // 🔹 Get Current User ID
   String get currentUserId => firebaseUser.value?.uid ?? '';
 
+  // 🔹 Sign Up
   Future<void> signUp(String name, String email, String password) async {
     try {
       isLoading.value = true;
-      UserCredential? cred = await _authService.registerWithEmail(email, password);
-      
-      if (cred != null) {
-        // Save user details to Firestore
-        await _firestoreService.saveUserToFirestore(cred.user!.uid, name, email);
+
+      UserCredential? cred =
+      await _authService.registerWithEmail(email, password);
+
+      if (cred != null && cred.user != null) {
+        // Save user info in Firestore
+        await _firestoreService.saveUserToFirestore(
+          cred.user!.uid,
+          name,
+          email,
+        );
+
         Get.offAllNamed(AppRoutes.home);
       }
+    } on FirebaseAuthException catch (e) {
+      Helpers.showSnackBar("Sign Up Failed", e.message ?? "Unknown error",
+          isError: true);
     } catch (e) {
       Helpers.showSnackBar("Error", e.toString(), isError: true);
     } finally {
@@ -38,19 +50,62 @@ class AuthController extends GetxController {
     }
   }
 
+  // 🔹 Login
   Future<void> login(String email, String password) async {
     try {
       isLoading.value = true;
+
       await _authService.loginWithEmail(email, password);
+
       Get.offAllNamed(AppRoutes.home);
+    } on FirebaseAuthException catch (e) {
+      Helpers.showSnackBar(
+        "Login Failed",
+        e.message ?? "Invalid credentials",
+        isError: true,
+      );
     } catch (e) {
-      Helpers.showSnackBar("Login Failed", "Invalid credentials", isError: true);
+      Helpers.showSnackBar("Error", e.toString(), isError: true);
     } finally {
       isLoading.value = false;
     }
   }
 
-  void signOut() async {
+  // 🔹 Forgot Password
+  Future<void> forgotPassword(String email) async {
+    try {
+      if (email.isEmpty) {
+        Helpers.showSnackBar(
+          "Error",
+          "Please enter your email first",
+          isError: true,
+        );
+        return;
+      }
+
+      isLoading.value = true;
+
+      await _authService.resetPassword(email);
+
+      Helpers.showSnackBar(
+        "Success",
+        "Password reset email sent",
+      );
+    } on FirebaseAuthException catch (e) {
+      Helpers.showSnackBar(
+        "Reset Failed",
+        e.message ?? "Something went wrong",
+        isError: true,
+      );
+    } catch (e) {
+      Helpers.showSnackBar("Error", e.toString(), isError: true);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // 🔹 Logout
+  Future<void> signOut() async {
     await _authService.logout();
     Get.offAllNamed(AppRoutes.login);
   }
