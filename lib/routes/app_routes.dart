@@ -12,7 +12,7 @@ import '../screens/profile/profile_screen.dart';
 class AppRoutes {
   // Route Name Constants
   static const String login = '/login';
-  static const String signup = '/signup';git
+  static const String signup = '/signup';
   static const String home = '/home';
   static const String chat = '/chat';
   static const String chatRoom = '/chat-room';
