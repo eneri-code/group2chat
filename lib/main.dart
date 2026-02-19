@@ -8,6 +8,7 @@ import 'core/theme/app_theme.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/chat_controller.dart';
 import 'controllers/group_controller.dart';
+import '../services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,7 @@ void main() async {
   Get.put(AuthController(), permanent: true);
   Get.lazyPut(() => ChatController());
   Get.lazyPut(() => GroupController());
+  await NotificationService.init(); // Initialize here
 
   runApp(const MyApp());
 }

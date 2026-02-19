@@ -4,6 +4,7 @@ import '../models/message_model.dart';
 import '../services/group_service.dart';
 import 'auth_controller.dart';
 import '../core/utils/helpers.dart';
+import '../services/notification_service.dart';
 
 class GroupController extends GetxController {
   final GroupService _groupService = GroupService();
@@ -18,6 +19,21 @@ class GroupController extends GetxController {
   void onInit() {
     super.onInit();
     fetchUserGroups();
+
+    // Listen to message changes for notifications
+    ever(groupMessages, (List<MessageModel> messages) {
+      if (messages.isNotEmpty) {
+        final lastMessage = messages.first; // Assuming first is the newest
+
+        // Only show notification if the message is from someone else
+        if (lastMessage.senderId != currentUserId) {
+          NotificationService.showNotification(
+              "New Group Message",
+              lastMessage.text
+          );
+        }
+      }
+    });
   }
 
   void fetchUserGroups() {
