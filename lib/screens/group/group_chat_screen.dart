@@ -20,7 +20,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   void initState() {
     super.initState();
-    _groupController.bindGroupMessages(group.id);
+    _groupController.bindGroupMessages(group.id, group.name);
+
   }
 
   @override

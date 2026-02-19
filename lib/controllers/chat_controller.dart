@@ -11,6 +11,10 @@ class ChatController extends GetxController {
   final ChatService _chatService = ChatService();
   final FirestoreService _firestoreService = FirestoreService();
 
+  String get currentUserName =>
+      Get.find<AuthController>().currentUserName;
+
+
   String get currentUserId => Get.find<AuthController>().currentUserId;
 
   RxList<ChatModel> chats = <ChatModel>[].obs;
@@ -87,12 +91,15 @@ class ChatController extends GetxController {
     required String receiverId,
     required String receiverName,
   }) async {
+
     await _chatService.sendTextMessage(
       chatId: chatId,
       senderId: currentUserId,
+      senderName: currentUserName, // add this
       receiverId: receiverId,
       receiverName: receiverName,
       text: text,
     );
+
   }
 }

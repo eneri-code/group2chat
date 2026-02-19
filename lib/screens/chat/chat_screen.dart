@@ -56,11 +56,14 @@ class _ChatScreenState extends State<ChatScreen> {
                   final message = messages[index];
                   // Logic to check if message is from the current user
                   bool isMe = message.senderId == _chatController.currentUserId;
-                  
+
                   return MessageBubble(
                     message: message,
                     isMe: isMe,
+                    showSenderName: !isMe,                // Only show sender name if message is from others
+                    senderName: message.senderName,       // Pass the actual sender's name from Firestore
                   );
+
                 },
               );
             }),
