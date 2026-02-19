@@ -1,100 +1,157 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
+import 'app_theme.dart';
 
-class AppTheme {
+void main() {
+  runApp(const MyApp());
+}
 
-  // 🌞 LIGHT THEME
-  static ThemeData get lightTheme {
-    return ThemeData(
-      brightness: Brightness.light,
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
-      primaryColor: AppColors.primary,
-      scaffoldBackgroundColor: AppColors.background,
+  @override
+  Widget build(BuildContext context) {
+    return const ThemeSwitcherApp();
+  }
+}
 
-      colorScheme: const ColorScheme.light(
-        primary: AppColors.primary,
-        secondary: AppColors.secondary,
-        error: AppColors.error,
-        surface: AppColors.surface,
-      ),
+class ThemeSwitcherApp extends StatefulWidget {
+  const ThemeSwitcherApp({super.key});
 
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
-        centerTitle: false,
-      ),
+  @override
+  State<ThemeSwitcherApp> createState() => _ThemeSwitcherAppState();
+}
 
-      iconTheme: const IconThemeData(
-        color: AppColors.textPrimary,
-      ),
+class _ThemeSwitcherAppState extends State<ThemeSwitcherApp> {
+  final ValueNotifier<ThemeMode> _themeModeNotifier =
+      ValueNotifier(ThemeMode.light);
 
-      textTheme: const TextTheme(
-        bodyLarge: TextStyle(color: AppColors.textPrimary),
-        bodyMedium: TextStyle(color: AppColors.textSecondary),
-      ),
+  bool get _isDark => _themeModeNotifier.value == ThemeMode.dark;
 
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+  void _toggleTheme() {
+    _themeModeNotifier.value =
+        _isDark ? ThemeMode.light : ThemeMode.dark;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: _themeModeNotifier,
+      builder: (context, themeMode, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          home: HomePage(
+            isDark: _isDark,
+            onToggle: _toggleTheme,
           ),
-        ),
-      ),
-
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
+        );
+      },
     );
   }
 
-  // 🌙 DARK THEME
-  static ThemeData get darkTheme {
-    return ThemeData(
-      brightness: Brightness.dark,
+  @override
+  void dispose() {
+    _themeModeNotifier.dispose();
+    super.dispose();
+  }
+}
 
-      primaryColor: AppColors.primary,
-      scaffoldBackgroundColor: Colors.black,
+class HomePage extends StatelessWidget {
+  final bool isDark;
+  final VoidCallback onToggle;
 
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.primary,
-        secondary: AppColors.secondary,
-        error: AppColors.error,
-        surface: Color(0xFF1E1E1E),
-      ),
+  const HomePage({
+    super.key,
+    required this.isDark,
+    required this.onToggle,
+  });
 
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF1E1E1E),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-      ),
-
-      iconTheme: const IconThemeData(
-        color: Colors.white,
-      ),
-
-      textTheme: const TextTheme(
-        bodyLarge: TextStyle(color: Colors.white),
-        bodyMedium: TextStyle(color: Colors.white70),
-      ),
-
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Theme Toggle Demo'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 400),
+              transitionBuilder: (child, animation) => ScaleTransition(
+                scale: animation,
+                child: child,
+              ),
+              child: IconButton(
+                key: ValueKey<bool>(isDark),
+                icon: Icon(
+                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                  color: isDark ? Colors.amber : null,
+                ),
+                tooltip: isDark ? 'Switch to Light' : 'Switch to Dark',
+                onPressed: onToggle,
+              ),
+            ),
           ),
-        ),
+        ],
       ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Current theme: ${isDark ? "Dark 🌙" : "Light ☀️"}',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 40),
 
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+            // Button yenye text + icon inayobadilika
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 350),
+              child: ElevatedButton.icon(
+                key: ValueKey<bool>(isDark),
+                onPressed: onToggle,
+                icon: Icon(
+                  isDark ? Icons.light_mode : Icons.dark_mode,
+                  size: 24,
+                ),
+                label: Text(
+                  isDark ? 'White Theme' : 'Dark Theme',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Chaguo la switch flanked na icons (alternative style)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.light_mode_outlined,
+                  color: isDark ? Colors.grey : Colors.amber,
+                ),
+                const SizedBox(width: 8),
+                Switch(
+                  value: isDark,
+                  onChanged: (_) => onToggle(),
+                  activeColor: Colors.amber,
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.dark_mode_outlined,
+                  color: isDark ? Colors.blueGrey[300] : Colors.grey,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
