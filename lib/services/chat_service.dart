@@ -67,7 +67,7 @@ class ChatService {
         .doc(chatId)
         .set({
       'receiverId': senderId,
-      'receiverName': 'Your Name Here',
+      'receiverName': receiverName,
       'lastMessage': text,
       'lastTime': now,
     });

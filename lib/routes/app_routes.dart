@@ -7,6 +7,7 @@ import '../screens/chat/chat_room_screen.dart';
 import '../screens/group/create_group_screen.dart';
 import '../screens/group/group_chat_screen.dart';
 import '../screens/new_chat/start_chat_screen.dart';
+import '../screens/profile/profile_screen.dart';
 
 class AppRoutes {
   // Route Name Constants
@@ -18,6 +19,8 @@ class AppRoutes {
   static const String createGroup = '/create-group';
   static const String groupChat = '/group-chat';
   static const String startChat = '/start-chat';
+  static const profile = '/profile';
+
 
   // List of GetPages
   static List<GetPage> routes = [
@@ -52,6 +55,11 @@ class AppRoutes {
       page: () => const GroupChatScreen(),
       transition: Transition.cupertino,
     ),
+    GetPage(
+      name: profile,
+      page: () => const ProfileScreen(),
+    ),
+
     GetPage(name: startChat, page: () => const StartChatScreen()),
   ];
 

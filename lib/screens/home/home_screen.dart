@@ -32,11 +32,36 @@ class HomeScreen extends StatelessWidget {
           title: const Text('Messages', style: TextStyle(fontWeight: FontWeight.bold)),
           centerTitle: false,
           actions: [
-            IconButton(
-              icon: const Icon(Icons.logout_rounded),
-              tooltip: 'Sign Out',
-              onPressed: () => _authController.signOut(),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.settings),
+              onSelected: (value) {
+                if (value == 'theme') {
+                  // Change theme logic
+                  Get.changeThemeMode(
+                    Get.isDarkMode ? ThemeMode.light : ThemeMode.dark,
+                  );
+                } else if (value == 'profile') {
+                  Get.toNamed(AppRoutes.profile); // Make sure route exists
+                } else if (value == 'logout') {
+                  _authController.signOut();
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'theme',
+                  child: Text('Change Theme'),
+                ),
+                const PopupMenuItem(
+                  value: 'profile',
+                  child: Text('My Profile'),
+                ),
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: Text('Logout'),
+                ),
+              ],
             ),
+
           ],
           bottom: const TabBar(
             indicatorColor: AppColors.primary,
