@@ -16,6 +16,33 @@ class MessageBubble extends StatelessWidget {
     this.showSenderName = false,
     this.senderName,
   });
+  // 1. HELPER METHOD FOR CHECKMARKS
+  Widget _buildStatusIcon() {
+    // Only show icons for my own messages
+    if (!isMe) return const SizedBox.shrink();
+
+    IconData icon;
+    Color color;
+
+    switch (message.status) {
+      case 3: // Read
+        icon = Icons.done_all;
+        color = Colors.blueAccent; // Distinct blue for "Read"
+        break;
+      case 2: // Delivered
+        icon = Icons.done_all;
+        color = Colors.white70; // Double grey/white for "Delivered"
+        break;
+      default: // Sent (1)
+        icon = Icons.done;
+        color = Colors.white70; // Single grey/white for "Sent"
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Icon(icon, size: 14, color: color),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
-import '../routes/app_routes.dart';
 import '../core/utils/helpers.dart';
 
 class AuthController extends GetxController {
@@ -18,6 +17,9 @@ class AuthController extends GetxController {
   // Loading indicator
   RxBool isLoading = false.obs;
 
+  // Tracks whether first auth state has been received
+  RxBool isAuthReady = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -25,22 +27,17 @@ class AuthController extends GetxController {
     // Bind Firebase auth state changes
     firebaseUser.bindStream(_authService.authStateChanges);
 
-    // Listen to changes in Firebase user
-    ever(firebaseUser, (User? user) {
+    // Listen to auth changes
+    ever(firebaseUser, (User? user) async {
+      // Mark auth as ready after first emission
+      if (!isAuthReady.value) {
+        isAuthReady.value = true;
+      }
+
       if (user != null) {
-        // User is logged in, fetch username
-        _loadUserName(user.uid);
-        // Redirect to home if not already there
-        if (Get.currentRoute != AppRoutes.home) {
-          Get.offAllNamed(AppRoutes.home);
-        }
+        await _loadUserName(user.uid);
       } else {
-        // User logged out
         userName.value = '';
-        // Redirect to login screen
-        if (Get.currentRoute != AppRoutes.login) {
-          Get.offAllNamed(AppRoutes.login);
-        }
       }
     });
   }
@@ -52,6 +49,7 @@ class AuthController extends GetxController {
       userName.value = userData['name'] ?? "User";
     } catch (e) {
       userName.value = "User";
+      print("Username load failed: $e");
     }
   }
 
@@ -67,7 +65,7 @@ class AuthController extends GetxController {
       isLoading.value = true;
 
       final UserCredential? cred =
-      await _authService.registerWithEmail(email, password);
+          await _authService.registerWithEmail(email, password);
 
       if (cred != null && cred.user != null) {
         // Save user info to Firestore
@@ -78,9 +76,7 @@ class AuthController extends GetxController {
         );
 
         userName.value = name;
-
-        // Navigate to home screen
-        Get.offAllNamed(AppRoutes.home);
+        // Navigation handled by Root
       }
     } on FirebaseAuthException catch (e) {
       Helpers.showSnackBar(
@@ -102,7 +98,7 @@ class AuthController extends GetxController {
 
       await _authService.loginWithEmail(email, password);
 
-      // Navigation handled automatically by `ever(firebaseUser, ...)`
+      // Navigation handled by Root via auth state
     } on FirebaseAuthException catch (e) {
       Helpers.showSnackBar(
         "Login Failed",
@@ -122,7 +118,7 @@ class AuthController extends GetxController {
       if (email.isEmpty) {
         Helpers.showSnackBar(
           "Error",
-          "Please enter your email first",
+          "Please enter your email first to change your password ",
           isError: true,
         );
         return;
@@ -148,6 +144,6 @@ class AuthController extends GetxController {
   /// Logout
   Future<void> signOut() async {
     await _authService.logout();
-    // Navigation handled automatically by `ever(firebaseUser, ...)`
+    // Root will handle navigation automatically
   }
 }

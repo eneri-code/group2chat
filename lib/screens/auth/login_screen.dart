@@ -6,6 +6,7 @@ import '../../widgets/custom_textfield.dart';
 import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
 
+// this is the log in screen for our app
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
@@ -29,7 +30,7 @@ class LoginScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Text(
-                  'Welcome Back',
+                  'Welcome Back Again',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,

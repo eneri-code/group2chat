@@ -21,6 +21,21 @@ class GroupController extends GetxController {
   void onInit() {
     super.onInit();
     fetchUserGroups();
+
+    // Listen to message changes for notifications
+    ever(groupMessages, (List<MessageModel> messages) {
+      if (messages.isNotEmpty) {
+        final lastMessage = messages.first; // Assuming first is the newest
+
+        // Only show notification if the message is from someone else
+        if (lastMessage.senderId != currentUserId) {
+          NotificationService.showNotification(
+              "New Group Message",
+              lastMessage.text
+          );
+        }
+      }
+    });
   }
 
   void fetchUserGroups() {
