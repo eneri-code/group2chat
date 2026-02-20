@@ -16,6 +16,16 @@ class FirestoreService {
     });
   }
 
+  Future<Map<String, dynamic>> getUserById(String uid) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    return doc.data() ?? {};
+  }
+
+
   // Get stream of all users (for starting new chats)
   Stream<List<UserModel>> getAllUsersStream() {
     return _db.collection(FirebaseConstants.usersCollection).snapshots().map(

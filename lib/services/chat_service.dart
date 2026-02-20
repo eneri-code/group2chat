@@ -38,6 +38,7 @@ class ChatService {
     final message = MessageModel(
       senderId: senderId,
       senderName: senderName,
+      senderName: senderName, // ✅ IMPORTANT
       text: text,
       timestamp: now,
       messageId: messageId,
@@ -53,6 +54,7 @@ class ChatService {
         .set(message.toMap());
 
     // 2️⃣ Update SENDER'S list (I sent it, so lastSenderId is ME)
+    // 2️⃣ Sender chat list (YOU see THEM)
     await _db
         .collection('users')
         .doc(senderId)
@@ -68,6 +70,7 @@ class ChatService {
     });
 
     // 3️⃣ Update RECEIVER'S list (I sent it, so lastSenderId is STILL ME)
+    // 3️⃣ Receiver chat list (THEY see YOU)
     await _db
         .collection('users')
         .doc(receiverId)
@@ -77,6 +80,8 @@ class ChatService {
       'id': chatId,
       'receiverId': senderId,
       'receiverName': senderName, // They see MY name
+      'receiverId': senderId,        // ✅ SWITCHED
+      'receiverName': senderName,    // ✅ SWITCHED
       'lastMessage': text,
       'lastTime': now,
       'lastSenderId': senderId, // 👈 Added
@@ -87,6 +92,7 @@ class ChatService {
     await _db.collection('chats').doc(chatId).collection('messages').doc(messageId).update({'status': status});
   }
 }
+
 
   Stream<List<MessageModel>> getMessageStream(String chatId) {
     var _db;

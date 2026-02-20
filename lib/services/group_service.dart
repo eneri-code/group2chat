@@ -46,6 +46,7 @@ class GroupService {
   Future<void> sendGroupTextMessage({
     required String groupId,
     required String senderId,
+    required String senderName,
     required String text,
   }) async {
     final messageId = DateTime.now().millisecondsSinceEpoch.toString();
@@ -57,6 +58,7 @@ class GroupService {
         .doc(messageId)
         .set({
           'senderId': senderId,
+          'senderName': senderName, // ✅ add this
           'text': text,
           'timestamp': FieldValue.serverTimestamp(),
           'messageId': messageId,

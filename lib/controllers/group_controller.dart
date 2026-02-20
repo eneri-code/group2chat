@@ -6,10 +6,12 @@ import 'auth_controller.dart';
 import '../core/utils/helpers.dart';
 import '../services/notification_service.dart';
 
+
 class GroupController extends GetxController {
   final GroupService _groupService = GroupService();
-  
+
   String get currentUserId => Get.find<AuthController>().currentUserId;
+  String get currentUserName => Get.find<AuthController>().currentUserName;
 
   RxList<GroupModel> groups = <GroupModel>[].obs;
   RxList<MessageModel> groupMessages = <MessageModel>[].obs;
@@ -40,15 +42,35 @@ class GroupController extends GetxController {
     groups.bindStream(_groupService.getGroupsStream(currentUserId));
   }
 
-  void bindGroupMessages(String groupId) {
-    groupMessages.bindStream(_groupService.getGroupMessageStream(groupId));
+  void bindGroupMessages(String groupId, String groupName) {
+
+    _groupService.getGroupMessageStream(groupId).listen((messages) {
+
+      if (messages.isNotEmpty) {
+
+        final latestMessage = messages.first;
+
+        // 🚨 Don't notify yourself
+        if (latestMessage.senderId != currentUserId) {
+
+          NotificationService.showNotification(
+            "$groupName • ${latestMessage.senderName}",
+            latestMessage.text,
+          );
+        }
+      }
+
+      groupMessages.assignAll(messages);
+    });
   }
+
 
   Future<void> createGroup(String name, List<String> members) async {
     try {
       isLoading.value = true;
       // Add the creator to the group
       members.add(currentUserId);
+      members.add(currentUserName);
       
       await _groupService.createNewGroup(name, members, currentUserId);
       Get.back(); // Go back to Home
@@ -64,6 +86,7 @@ class GroupController extends GetxController {
     await _groupService.sendGroupTextMessage(
       groupId: groupId,
       senderId: currentUserId,
+      senderName: currentUserName,
       text: text,
     );
   }
