@@ -79,7 +79,7 @@ class ChatController extends GetxController {
 
   void bindMessageStream(String chatId) {
     activeChatId.value = chatId; // Set active chat to prevent popups while reading
-    messages.bindStream(_chatService.getMessageStream(chatId));
+    messages.bindStream;
   }
 
   void disposeMessageStream() {

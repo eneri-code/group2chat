@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get/get.dart';
-import '../controllers/auth_controller.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import '../core/constants/firebase_constants.dart';
@@ -43,6 +41,7 @@ class ChatService {
       text: text,
       timestamp: now,
       messageId: messageId,
+      status: 1,
     );
 
     // 1️⃣ Save the actual message
@@ -83,8 +82,14 @@ class ChatService {
       'lastSenderId': senderId, // 👈 Added
     });
   }
+  // Update status to 'Read' (3)
+  Future<void> updateMessageStatus(String chatId, String messageId, int status) async {
+    await _db.collection('chats').doc(chatId).collection('messages').doc(messageId).update({'status': status});
+  }
+}
 
   Stream<List<MessageModel>> getMessageStream(String chatId) {
+    var _db;
     return _db
         .collection(FirebaseConstants.chatsCollection)
         .doc(chatId)
@@ -95,7 +100,7 @@ class ChatService {
             .map((doc) => MessageModel.fromMap(doc.data()))
             .toList());
   }
-}
+
 
 extension on String {
   String? get name => null;
