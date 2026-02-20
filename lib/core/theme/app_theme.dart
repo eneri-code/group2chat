@@ -78,7 +78,7 @@ class HomePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
+              duration: const Duration(milliseconds: 350),
               transitionBuilder: (child, animation) => ScaleTransition(
                 scale: animation,
                 child: child,
