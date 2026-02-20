@@ -43,7 +43,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             padding: const EdgeInsets.all(16.0),
             child: CustomTextField(
               controller: _nameController,
-              hintText: "Enter group name...",
+              hintText: "Enter your group name",
               prefixIcon: Icons.group_add_outlined,
               onChanged: (_) => setState(() {}), // Refresh CREATE button state
             ),
