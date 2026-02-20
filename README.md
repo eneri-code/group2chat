@@ -1,3 +1,21 @@
+GROUP MEMBERS
+
+JULIANA LOTSON ABRAHAM  	NIT/BCS/2023/515 
+GIDEON SAMWEL MSUYA 	      NIT/BCS/2023/550 
+IDDY  ATHUMANI MSEMO 	   NIT/BCS/2023/523 
+ZERA ELIAS MSIGALA 	      NIT/BCS/2023/556 
+JOSELINE SADI  MWAMGIGA 	NIT/BCS/2023/569 
+REHANI  EMANUEL PARII 	   NIT/BCS/2023/559 
+IRENE ALPHONCE ROBERT 	   NIT/BCS/2023/522 
+VICENT  KESSY  	         NIT/BCS/2023/510 
+RAPHAEL AZARIA 	         NIT/BCS/2023/524
+NOEL MAGABE             	NIT/BCS/2022/438
+
+
+
+
+
+
 # group2_chat
 
 A Flutter chat application with support for authentication, one-to-one chats, and group chats backed by Firebase (Auth + Firestore). This README covers setup, development, and the project structure.
@@ -38,67 +56,9 @@ group2_chat is a starter Flutter chat app scaffolded to use Firebase for authent
 - A Firebase project for Android/iOS/web
 - FlutterFire CLI (optional but recommended) to configure firebase_options.dart
 
-## Setup
 
-1. Clone the repo
-   ```
-   git clone https://github.com/eneri-code/group2chat.git
-   cd group2chat
-   ```
 
-2. Install dependencies
-   ```
-   flutter pub get
-   ```
 
-3. Configure Firebase (see next section)
-
-4. Run the app
-   ```
-   flutter run
-   ```
-
-## Firebase configuration
-
-This project includes a firebase/firebase_options.dart file. To configure Firebase for your platforms:
-
-Option A — use FlutterFire CLI (recommended):
-1. Install & login: `dart pub global activate flutterfire_cli` then `flutterfire configure`
-2. Follow prompts to select your Firebase project and platforms. This will update firebase_options.dart.
-
-Option B — manual:
-1. Create a Firebase project and add Android and/or iOS apps.
-2. Download `google-services.json` (Android) and/or `GoogleService-Info.plist` (iOS) and place them in the appropriate platform directories.
-3. Update firebase/firebase_options.dart with your Firebase options (or regenerate it with the FlutterFire CLI).
-
-Environment/config values
-- The project contains `core/constants/firebase_constants.dart`. If your app requires extra environment variables, create an `.env` (or similar) and update your app's configuration accordingly.
-- Example .env keys (adjust to your code):
-  ```
-  FIREBASE_API_KEY=your_api_key
-  FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-  FIREBASE_PROJECT_ID=your_project_id
-  FIREBASE_STORAGE_BUCKET=your_bucket
-  FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-  FIREBASE_APP_ID=your_app_id
-  ```
-
-## Run
-
-- Launch on connected device or emulator:
-  ```
-  flutter run
-  ```
-
-- Build APK (Android):
-  ```
-  flutter build apk --release
-  ```
-
-- Build iOS (macOS + Xcode):
-  ```
-  flutter build ios --release
-  ```
 
 ## Project structure
 
@@ -157,34 +117,6 @@ lib/
 └── firebase/
     └── firebase_options.dart
 ```
+<img src="PICTURES/app icon.jpg">
 
-## Testing
-- If you have unit or widget tests, run:
-  ```
-  flutter test
-  ```
 
-- Add widget tests under `test/` and run the same command.
-
-## Contributing
-- Open an issue for bugs or feature requests.
-- Fork, create a feature branch, and open a pull request.
-- Follow existing code style (Dart/Flutter conventions).
-
-Suggested commit message for README changes:
-```
-docs: update README with setup and firebase instructions
-```
-
-## Troubleshooting
-- "Firebase not initialized" — ensure firebase_options.dart is present and Firebase.initializeApp() is called in main.dart before runApp.
-- Platform-specific Google services files missing — add `google-services.json` (Android) and `GoogleService-Info.plist` (iOS).
-- Authentication errors — confirm Firebase Auth is enabled in your Firebase console.
-
-## Contact
-Create an issue or discussion in this repository for questions or feature requests.
-
-## Repository info
-- Repository: eneri-code/group2chat
-- Repository ID: 1160742110
-- Language composition: Flutter (Dart) — project is a Flutter app, primary language Dart
