@@ -49,7 +49,7 @@ class _StartChatScreenState extends State<StartChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("New Chat"),
+        title: const Text("Start New Chat"),
       ),
       body: Column(
         children: [
@@ -96,7 +96,7 @@ class _StartChatScreenState extends State<StartChatScreen> {
                         "New Group",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: const Text("Create a group conversation"),
+                      subtitle: const Text("Create a Group conversation"),
                     );
                   }
 
