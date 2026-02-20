@@ -118,7 +118,7 @@ class AuthController extends GetxController {
       if (email.isEmpty) {
         Helpers.showSnackBar(
           "Error",
-          "Please enter your email first",
+          "Please enter your email first to change your password ",
           isError: true,
         );
         return;

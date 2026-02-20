@@ -12,6 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.group2_chat"
+        minSdkVersion flutter.minSdkVersion
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

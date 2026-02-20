@@ -33,6 +33,7 @@ void main() async {
   Get.put(AuthController(), permanent: true);
   Get.lazyPut(() => ChatController());
   Get.lazyPut(() => GroupController());
+  await NotificationService.init(); // Initialize here
 
   runApp(const MyApp());
 }

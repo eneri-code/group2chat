@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:collection/collection.dart'; // for firstWhereOrNull
+
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import '../models/user_model.dart';
@@ -11,10 +13,7 @@ class ChatController extends GetxController {
   final ChatService _chatService = ChatService();
   final FirestoreService _firestoreService = FirestoreService();
 
-  String get currentUserName =>
-      Get.find<AuthController>().currentUserName;
-
-
+  String get currentUserName => Get.find<AuthController>().currentUserName;
   String get currentUserId => Get.find<AuthController>().currentUserId;
 
   RxList<ChatModel> chats = <ChatModel>[].obs;
@@ -22,29 +21,35 @@ class ChatController extends GetxController {
   RxList<UserModel> allUsers = <UserModel>[].obs;
   RxBool isLoading = false.obs;
 
-  // Track which chat the user is currently looking at
   RxString activeChatId = ''.obs;
+
+  // ── NEW: Track the last processed timestamp per chat to detect REAL new messages ──
+  final Map<String, DateTime> _lastProcessedTimestamps = {};
 
   @override
   void onInit() {
     super.onInit();
-    // Initialize Local Notifications
     NotificationService.init();
 
     fetchUserChats();
     fetchAllUsers();
 
-    // Listen for changes in the chat list to trigger notifications
-    setupNotificationListener();
+    // Only setup listener after initial load
+    ever(chats, (_) {
+      // This runs after first bindStream emission
+      setupNotificationListener();
+    });
   }
 
   void fetchUserChats() {
+    // bindStream already gives us real-time updates
     chats.bindStream(_chatService.getChatStream(currentUserId));
   }
 
   void setupNotificationListener() {
-    // .listen triggers every time the 'chats' collection updates in Firestore
-    chats.listen((updatedChats) {
+    // We use .listen on the stream directly instead of .listen on RxList
+    // This avoids duplicate listeners if onInit is called multiple times
+    _chatService.getChatStream(currentUserId).listen((updatedChats) {
       if (updatedChats.isEmpty) return;
 
       // Get the most recently updated chat
@@ -53,6 +58,12 @@ class ChatController extends GetxController {
       // 1. Don't notify if the message is from ME
       // Note: You need a 'lastSenderId' in your model for 100% accuracy,
       // but usually, if the chat list updates, it's because a message arrived.
+      if (latestChat.lastSenderId != currentUserId) {
+        NotificationService.showNotification(
+            latestChat.receiverName, // The partner's name
+            latestChat.lastMessage
+        );
+      }
 
       // 2. Don't notify if I am currently in this specific chat room
       if (activeChatId.value == latestChat.id) return;
@@ -67,6 +78,36 @@ class ChatController extends GetxController {
           latestChat.receiverName,
           latestChat.lastMessage,
         );
+      // Sort by lastTime descending → newest first
+      updatedChats.sort((a, b) => b.lastTime.compareTo(a.lastTime));
+
+      for (final chat in updatedChats) {
+        // Skip if this is the currently open chat
+        if (activeChatId.value == chat.id) continue;
+
+        // Skip if message is from me
+        if (chat.lastSenderId == currentUserId) continue;
+
+        // NEW: Only notify for chats we have previously seen
+        final previousTime = _lastProcessedTimestamps[chat.id];
+        if (previousTime == null) {
+          // First time seeing this chat → probably initial load → skip notify
+          _lastProcessedTimestamps[chat.id] = chat.lastTime;
+          continue;
+        }
+
+        // Only notify if there's a newer message
+        if (chat.lastTime.isAfter(previousTime)) {
+          NotificationService.showNotification(
+            title: chat.receiverName ?? 'New message',
+            body: chat.lastMessage ?? 'You have a new message',
+            // Optional: payload with chat.id to open correct chat on tap
+            payload: chat.id,
+          );
+
+          // Update last processed time
+          _lastProcessedTimestamps[chat.id] = chat.lastTime;
+        }
       }
     });
   }
@@ -77,11 +118,13 @@ class ChatController extends GetxController {
 
   void bindMessageStream(String chatId) {
     activeChatId.value = chatId; // Set active chat to prevent popups while reading
+    messages.bindStream;
+    activeChatId.value = chatId;
     messages.bindStream(_chatService.getMessageStream(chatId));
   }
 
   void disposeMessageStream() {
-    activeChatId.value = ''; // Reset when leaving the chat room
+    activeChatId.value = '';
     messages.clear();
   }
 
@@ -91,15 +134,19 @@ class ChatController extends GetxController {
     required String receiverId,
     required String receiverName,
   }) async {
-
     await _chatService.sendTextMessage(
       chatId: chatId,
       senderId: currentUserId,
-      senderName: currentUserName, // add this
+      senderName: currentUserName,
       receiverId: receiverId,
       receiverName: receiverName,
-      text: text,
+      text: text, senderName: '',
     );
+  }
 
+  // Optional: Call this when app resumes (in main.dart or AppLifecycle observer)
+  void onAppResumed() {
+    // You can refresh critical data or clear stale in-memory state if needed
+    // But usually not necessary with Firestore streams
   }
 }
