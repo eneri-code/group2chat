@@ -117,6 +117,14 @@ lib/
 └── firebase/
     └── firebase_options.dart
 ```
-<img src="PICTURES/app icon.jpg">
-
+<img src="PICTURES/app icon.jpg" width="30" height="50" >
+<img src="PICTURES/charting.jpg" width="30" height="50" >
+<img src="PICTURES/chatting groups.jpg" width="30" height="50" >
+<img src="PICTURES/dark theme.jpg" width="30" height="50" >
+<img src="PICTURES/groups.jpg" width="30" height="50" >
+<img src="PICTURES/login.jpg" width="30" height="50" >
+<img src="PICTURES/message.jpg" width="30" height="50" >
+<img src="PICTURES/name dark theme.jpg" width="30" height="50" >
+<img src="PICTURES/names.jpg" width="30" height="50" >
+<img src="PICTURES/setting.jpg" width="30" height="50" >
 
