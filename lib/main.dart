@@ -13,13 +13,21 @@ import '../services/notification_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Initialize Firebase safely
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint("Firebase init error: $e");
+  }
 
-  // Initialize local notifications
-  await NotificationService.init();
+  // Initialize notifications safely
+  try {
+    await NotificationService.init();
+  } catch (e) {
+    debugPrint("Notification init error: $e");
+  }
 
   // Initialize controllers
   Get.put(AuthController(), permanent: true);
@@ -38,59 +46,53 @@ class MyApp extends StatelessWidget {
       title: 'Chatify',
       debugShowCheckedModeBanner: false,
 
-      // Themes
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.light,
+      themeMode: ThemeMode.system,
 
-      // Root widget handles login state
       home: const Root(),
 
-      // GetX routes
       getPages: AppRoutes.routes,
       defaultTransition: Transition.fade,
     );
   }
 }
 
-/// Root widget to decide which screen to show based on login
-class Root extends StatelessWidget {
+/// Root widget decides navigation based on auth readiness
+class Root extends StatefulWidget {
   const Root({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final AuthController authController = Get.find();
-
-    return Obx(() {
-      // Firebase is still initializing or checking login
-      if (authController.firebaseUser.value == null) {
-        return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        );
-      }
-
-      // User is logged in
-      if (authController.firebaseUser.value != null) {
-        return GetPageRouteWrapper(AppRoutes.home);
-      }
-
-      // User is NOT logged in
-      return GetPageRouteWrapper(AppRoutes.login);
-    });
-  }
+  State<Root> createState() => _RootState();
 }
 
-/// Helper to navigate using GetX routes
-class GetPageRouteWrapper extends StatelessWidget {
-  final String routeName;
-  const GetPageRouteWrapper(this.routeName, {super.key});
+class _RootState extends State<Root> {
+  final AuthController authController = Get.find();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Wait until Firebase auth check completes
+    ever(authController.isAuthReady, (ready) {
+      if (ready == true) {
+        _routeUser();
+      }
+    });
+  }
+
+  void _routeUser() {
+    final user = authController.firebaseUser.value;
+
+    if (user != null) {
+      Get.offAllNamed(AppRoutes.home);
+    } else {
+      Get.offAllNamed(AppRoutes.login);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Use Future.microtask to push route after build
-    Future.microtask(() => Get.offAllNamed(routeName));
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    );
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
