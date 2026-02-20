@@ -1,3 +1,5 @@
+// this is our chat model for the group
+
 class ChatModel {
   final String id;
   final String receiverName;
