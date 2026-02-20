@@ -1,10 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
+import '../controllers/auth_controller.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import '../core/constants/firebase_constants.dart';
 
 class ChatService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  get _chatService => null;
+
+  get currentUserId => null;
 
   // Fetch list of active chats for a user
   Stream<List<ChatModel>> getChatStream(String userId) {
@@ -23,6 +29,7 @@ class ChatService {
   Future<void> sendTextMessage({
     required String chatId,
     required String senderId,
+    required String senderName,
     required String receiverId,
     required String receiverName,
     required String text,
@@ -32,13 +39,13 @@ class ChatService {
 
     final message = MessageModel(
       senderId: senderId,
-      senderName: '',
+      senderName: senderName,
       text: text,
       timestamp: now,
       messageId: messageId,
     );
 
-    // 1️⃣ Save message
+    // 1️⃣ Save the actual message
     await _db
         .collection('chats')
         .doc(chatId)
@@ -46,33 +53,36 @@ class ChatService {
         .doc(messageId)
         .set(message.toMap());
 
-    // 2️⃣ Create/Update sender chat list
+    // 2️⃣ Update SENDER'S list (I sent it, so lastSenderId is ME)
     await _db
         .collection('users')
         .doc(senderId)
         .collection('chats')
         .doc(chatId)
         .set({
+      'id': chatId,
       'receiverId': receiverId,
       'receiverName': receiverName,
       'lastMessage': text,
       'lastTime': now,
+      'lastSenderId': senderId, // 👈 Added
     });
 
-    // 3️⃣ Create/Update receiver chat list
+    // 3️⃣ Update RECEIVER'S list (I sent it, so lastSenderId is STILL ME)
     await _db
         .collection('users')
         .doc(receiverId)
         .collection('chats')
         .doc(chatId)
         .set({
+      'id': chatId,
       'receiverId': senderId,
-      'receiverName': receiverName,
+      'receiverName': senderName, // They see MY name
       'lastMessage': text,
       'lastTime': now,
+      'lastSenderId': senderId, // 👈 Added
     });
   }
-
 
   Stream<List<MessageModel>> getMessageStream(String chatId) {
     return _db
@@ -85,4 +95,8 @@ class ChatService {
             .map((doc) => MessageModel.fromMap(doc.data()))
             .toList());
   }
+}
+
+extension on String {
+  String? get name => null;
 }

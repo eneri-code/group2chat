@@ -49,6 +49,12 @@ class ChatController extends GetxController {
       // 1. Don't notify if the message is from ME
       // Note: You need a 'lastSenderId' in your model for 100% accuracy,
       // but usually, if the chat list updates, it's because a message arrived.
+      if (latestChat.lastSenderId != currentUserId) {
+        NotificationService.showNotification(
+            latestChat.receiverName, // The partner's name
+            latestChat.lastMessage
+        );
+      }
 
       // 2. Don't notify if I am currently in this specific chat room
       if (activeChatId.value == latestChat.id) return;
@@ -92,7 +98,7 @@ class ChatController extends GetxController {
       senderId: currentUserId,
       receiverId: receiverId,
       receiverName: receiverName,
-      text: text,
+      text: text, senderName: '',
     );
   }
 }
