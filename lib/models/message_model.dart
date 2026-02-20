@@ -30,7 +30,10 @@ class MessageModel {
       senderId: map['senderId'] ?? '',
       senderName: map['senderName'] ?? '',
       text: map['text'] ?? '',
-      timestamp: (map['timestamp'] as Timestamp).toDate(),
+      timestamp: map['timestamp'] != null
+          ? (map['timestamp'] as Timestamp).toDate()
+          : DateTime.now(),
+
       messageId: map['messageId'] ?? '',
     );
   }

@@ -8,14 +8,28 @@ import 'core/theme/app_theme.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/chat_controller.dart';
 import 'controllers/group_controller.dart';
+import '../services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Initialize Firebase safely
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint("Firebase init error: $e");
+  }
 
+  // Initialize notifications safely
+  try {
+    await NotificationService.init();
+  } catch (e) {
+    debugPrint("Notification init error: $e");
+  }
+
+  // Initialize controllers
   Get.put(AuthController(), permanent: true);
   Get.lazyPut(() => ChatController());
   Get.lazyPut(() => GroupController());
@@ -32,18 +46,53 @@ class MyApp extends StatelessWidget {
       title: 'Chatify',
       debugShowCheckedModeBanner: false,
 
-      // ✅ Light Theme
       theme: AppTheme.lightTheme,
-
-      // ✅ Dark Theme
       darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
 
-      // ✅ Default Mode
-      themeMode: ThemeMode.light,
+      home: const Root(),
 
-      initialRoute: AppRoutes.login,
       getPages: AppRoutes.routes,
       defaultTransition: Transition.fade,
     );
+  }
+}
+
+/// Root widget decides navigation based on auth readiness
+class Root extends StatefulWidget {
+  const Root({super.key});
+
+  @override
+  State<Root> createState() => _RootState();
+}
+
+class _RootState extends State<Root> {
+  final AuthController authController = Get.find();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Wait until Firebase auth check completes
+    ever(authController.isAuthReady, (ready) {
+      if (ready == true) {
+        _routeUser();
+      }
+    });
+  }
+
+  void _routeUser() {
+    final user = authController.firebaseUser.value;
+
+    if (user != null) {
+      Get.offAllNamed(AppRoutes.home);
+    } else {
+      Get.offAllNamed(AppRoutes.login);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }

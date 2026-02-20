@@ -23,6 +23,7 @@ class ChatService {
   Future<void> sendTextMessage({
     required String chatId,
     required String senderId,
+    required String senderName,
     required String receiverId,
     required String receiverName,
     required String text,
@@ -32,7 +33,7 @@ class ChatService {
 
     final message = MessageModel(
       senderId: senderId,
-      senderName: '',
+      senderName: senderName, // ✅ IMPORTANT
       text: text,
       timestamp: now,
       messageId: messageId,
@@ -46,7 +47,7 @@ class ChatService {
         .doc(messageId)
         .set(message.toMap());
 
-    // 2️⃣ Create/Update sender chat list
+    // 2️⃣ Sender chat list (YOU see THEM)
     await _db
         .collection('users')
         .doc(senderId)
@@ -59,19 +60,20 @@ class ChatService {
       'lastTime': now,
     });
 
-    // 3️⃣ Create/Update receiver chat list
+    // 3️⃣ Receiver chat list (THEY see YOU)
     await _db
         .collection('users')
         .doc(receiverId)
         .collection('chats')
         .doc(chatId)
         .set({
-      'receiverId': senderId,
-      'receiverName': receiverName,
+      'receiverId': senderId,        // ✅ SWITCHED
+      'receiverName': senderName,    // ✅ SWITCHED
       'lastMessage': text,
       'lastTime': now,
     });
   }
+
 
 
   Stream<List<MessageModel>> getMessageStream(String chatId) {

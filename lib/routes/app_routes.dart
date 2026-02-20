@@ -8,6 +8,8 @@ import '../screens/group/create_group_screen.dart';
 import '../screens/group/group_chat_screen.dart';
 import '../screens/new_chat/start_chat_screen.dart';
 import '../screens/profile/profile_screen.dart';
+import '../services/notification_service.dart';
+
 
 class AppRoutes {
   // Route Name Constants

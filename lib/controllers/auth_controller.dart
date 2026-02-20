@@ -2,47 +2,88 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
-import '../routes/app_routes.dart';
 import '../core/utils/helpers.dart';
 
 class AuthController extends GetxController {
   final AuthService _authService = AuthService();
   final FirestoreService _firestoreService = FirestoreService();
 
-  RxBool isLoading = false.obs;
+  // Reactive Firebase user
   Rx<User?> firebaseUser = Rx<User?>(null);
+
+  // Reactive username
+  RxString userName = ''.obs;
+
+  // Loading indicator
+  RxBool isLoading = false.obs;
+
+  // Tracks whether first auth state has been received
+  RxBool isAuthReady = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // Listen to authentication state changes
+
+    // Bind Firebase auth state changes
     firebaseUser.bindStream(_authService.authStateChanges);
+
+    // Listen to auth changes
+    ever(firebaseUser, (User? user) async {
+      // Mark auth as ready after first emission
+      if (!isAuthReady.value) {
+        isAuthReady.value = true;
+      }
+
+      if (user != null) {
+        await _loadUserName(user.uid);
+      } else {
+        userName.value = '';
+      }
+    });
   }
 
-  // 🔹 Get Current User ID
+  /// Load user name from Firestore
+  Future<void> _loadUserName(String uid) async {
+    try {
+      final userData = await _firestoreService.getUserById(uid);
+      userName.value = userData['name'] ?? "User";
+    } catch (e) {
+      userName.value = "User";
+      print("Username load failed: $e");
+    }
+  }
+
+  /// Current user ID
   String get currentUserId => firebaseUser.value?.uid ?? '';
 
-  // 🔹 Sign Up
+  /// Current user name
+  String get currentUserName => userName.value;
+
+  /// Sign Up
   Future<void> signUp(String name, String email, String password) async {
     try {
       isLoading.value = true;
 
-      UserCredential? cred =
-      await _authService.registerWithEmail(email, password);
+      final UserCredential? cred =
+          await _authService.registerWithEmail(email, password);
 
       if (cred != null && cred.user != null) {
-        // Save user info in Firestore
+        // Save user info to Firestore
         await _firestoreService.saveUserToFirestore(
           cred.user!.uid,
           name,
           email,
         );
 
-        Get.offAllNamed(AppRoutes.home);
+        userName.value = name;
+        // Navigation handled by Root
       }
     } on FirebaseAuthException catch (e) {
-      Helpers.showSnackBar("Sign Up Failed", e.message ?? "Unknown error",
-          isError: true);
+      Helpers.showSnackBar(
+        "Sign Up Failed",
+        e.message ?? "Unknown error",
+        isError: true,
+      );
     } catch (e) {
       Helpers.showSnackBar("Error", e.toString(), isError: true);
     } finally {
@@ -50,14 +91,14 @@ class AuthController extends GetxController {
     }
   }
 
-  // 🔹 Login
+  /// Login
   Future<void> login(String email, String password) async {
     try {
       isLoading.value = true;
 
       await _authService.loginWithEmail(email, password);
 
-      Get.offAllNamed(AppRoutes.home);
+      // Navigation handled by Root via auth state
     } on FirebaseAuthException catch (e) {
       Helpers.showSnackBar(
         "Login Failed",
@@ -71,7 +112,7 @@ class AuthController extends GetxController {
     }
   }
 
-  // 🔹 Forgot Password
+  /// Forgot Password
   Future<void> forgotPassword(String email) async {
     try {
       if (email.isEmpty) {
@@ -84,13 +125,9 @@ class AuthController extends GetxController {
       }
 
       isLoading.value = true;
-
       await _authService.resetPassword(email);
 
-      Helpers.showSnackBar(
-        "Success",
-        "Password reset email sent",
-      );
+      Helpers.showSnackBar("Success", "Password reset email sent");
     } on FirebaseAuthException catch (e) {
       Helpers.showSnackBar(
         "Reset Failed",
@@ -104,9 +141,9 @@ class AuthController extends GetxController {
     }
   }
 
-  // 🔹 Logout
+  /// Logout
   Future<void> signOut() async {
     await _authService.logout();
-    Get.offAllNamed(AppRoutes.login);
+    // Root will handle navigation automatically
   }
 }
