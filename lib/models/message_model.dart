@@ -6,13 +6,15 @@ class MessageModel {
   final String text;
   final DateTime timestamp;
   final String messageId;
+  final int status;
 
-  MessageModel({
+  MessageModel( {
     required this.senderId,
     required this.senderName,
     required this.text,
     required this.timestamp,
     required this.messageId,
+    this.status = 1,
   });
 
   Map<String, dynamic> toMap() {
@@ -22,6 +24,7 @@ class MessageModel {
       'text': text,
       'timestamp': Timestamp.fromDate(timestamp),
       'messageId': messageId,
+      'status': status,
     };
   }
 
@@ -35,6 +38,7 @@ class MessageModel {
           : DateTime.now(),
 
       messageId: map['messageId'] ?? '',
+      status: map['status'] ?? 1,
     );
   }
 }

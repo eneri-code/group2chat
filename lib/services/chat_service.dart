@@ -6,6 +6,10 @@ import '../core/constants/firebase_constants.dart';
 class ChatService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  get _chatService => null;
+
+  get currentUserId => null;
+
   // Fetch list of active chats for a user
   Stream<List<ChatModel>> getChatStream(String userId) {
     return _db
@@ -33,13 +37,15 @@ class ChatService {
 
     final message = MessageModel(
       senderId: senderId,
+      senderName: senderName,
       senderName: senderName, // ✅ IMPORTANT
       text: text,
       timestamp: now,
       messageId: messageId,
+      status: 1,
     );
 
-    // 1️⃣ Save message
+    // 1️⃣ Save the actual message
     await _db
         .collection('chats')
         .doc(chatId)
@@ -47,6 +53,7 @@ class ChatService {
         .doc(messageId)
         .set(message.toMap());
 
+    // 2️⃣ Update SENDER'S list (I sent it, so lastSenderId is ME)
     // 2️⃣ Sender chat list (YOU see THEM)
     await _db
         .collection('users')
@@ -54,12 +61,15 @@ class ChatService {
         .collection('chats')
         .doc(chatId)
         .set({
+      'id': chatId,
       'receiverId': receiverId,
       'receiverName': receiverName,
       'lastMessage': text,
       'lastTime': now,
+      'lastSenderId': senderId, // 👈 Added
     });
 
+    // 3️⃣ Update RECEIVER'S list (I sent it, so lastSenderId is STILL ME)
     // 3️⃣ Receiver chat list (THEY see YOU)
     await _db
         .collection('users')
@@ -67,16 +77,25 @@ class ChatService {
         .collection('chats')
         .doc(chatId)
         .set({
+      'id': chatId,
+      'receiverId': senderId,
+      'receiverName': senderName, // They see MY name
       'receiverId': senderId,        // ✅ SWITCHED
       'receiverName': senderName,    // ✅ SWITCHED
       'lastMessage': text,
       'lastTime': now,
+      'lastSenderId': senderId, // 👈 Added
     });
   }
-
+  // Update status to 'Read' (3)
+  Future<void> updateMessageStatus(String chatId, String messageId, int status) async {
+    await _db.collection('chats').doc(chatId).collection('messages').doc(messageId).update({'status': status});
+  }
+}
 
 
   Stream<List<MessageModel>> getMessageStream(String chatId) {
+    var _db;
     return _db
         .collection(FirebaseConstants.chatsCollection)
         .doc(chatId)
@@ -87,4 +106,8 @@ class ChatService {
             .map((doc) => MessageModel.fromMap(doc.data()))
             .toList());
   }
+
+
+extension on String {
+  String? get name => null;
 }

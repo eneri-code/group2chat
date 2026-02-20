@@ -120,7 +120,7 @@ class _StartChatScreenState extends State<StartChatScreen> {
                         receiverName: user.name,
                         receiverId: user.id,
                         lastMessage: "",
-                        lastTime: DateTime.now(),
+                        lastTime: DateTime.now(), lastSenderId: '',
                       );
 
                       // Open Chat Room
